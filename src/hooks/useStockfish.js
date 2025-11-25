@@ -15,8 +15,8 @@ export const useStockfish = () => {
 
     try {
       // Initialize Stockfish worker from local file
-      // Use stockfish.worker.js which is designed to be loaded as a Worker
-      sf = new Worker('/stockfish.worker.js');
+      // Use stockfish-wrapper.js which properly configures the WASM path
+      sf = new Worker('/stockfish-wrapper.js');
 
       sf.onerror = (err) => {
         console.error('Stockfish Worker error:', err);
