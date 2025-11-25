@@ -1,5 +1,5 @@
-import React from 'react';
-import { PIECE_SYMBOLS, getFiles, getRanks, isLightSquare } from '../utils/constants';
+import React, { useState } from 'react';
+import { PIECE_SYMBOLS, getPieceImage, getFiles, getRanks, isLightSquare } from '../utils/constants';
 
 /**
  * ChessBoard Component
@@ -15,6 +15,7 @@ const ChessBoard = ({
 }) => {
   const files = getFiles(orientation);
   const ranks = getRanks(orientation);
+  const [useImages, setUseImages] = useState(true);
 
   const isLastMoveSquare = (square) => {
     return lastMove && (lastMove.from === square || lastMove.to === square);
@@ -51,20 +52,36 @@ const ChessBoard = ({
               `}
             >
               {piece && (
-                <span 
-                  className={`
-                    chess-piece
-                    ${piece.color === 'w' ? 'text-gray-900' : 'text-gray-800'}
-                    ${isSelected ? 'scale-110' : 'scale-100'}
-                  `}
-                  style={{
-                    textShadow: piece.color === 'w' 
-                      ? '0 1px 2px rgba(0,0,0,0.1)' 
-                      : '0 1px 2px rgba(255,255,255,0.1)'
-                  }}
-                >
-                  {PIECE_SYMBOLS[piece.type.toUpperCase()] || piece.type}
-                </span>
+                useImages ? (
+                  <img
+                    src={getPieceImage(piece.type, piece.color)}
+                    alt={`${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}`}
+                    className={`
+                      chess-piece-img
+                      w-[85%] h-[85%]
+                      ${isSelected ? 'scale-110' : 'scale-100'}
+                      transition-transform duration-150
+                      pointer-events-none
+                    `}
+                    draggable={false}
+                    onError={() => setUseImages(false)}
+                  />
+                ) : (
+                  <span
+                    className={`
+                      chess-piece
+                      ${piece.color === 'w' ? 'text-gray-900' : 'text-gray-800'}
+                      ${isSelected ? 'scale-110' : 'scale-100'}
+                    `}
+                    style={{
+                      textShadow: piece.color === 'w'
+                        ? '0 1px 2px rgba(0,0,0,0.1)'
+                        : '0 1px 2px rgba(255,255,255,0.1)'
+                    }}
+                  >
+                    {PIECE_SYMBOLS[piece.type.toUpperCase()] || piece.type}
+                  </span>
+                )
               )}
               
               {isLegalMove && (
