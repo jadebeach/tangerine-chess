@@ -7,60 +7,40 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export const useStockfish = () => {
   const [stockfish, setStockfish] = useState(null);
   const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState(null);
   const responseHandlers = useRef({});
 
   useEffect(() => {
-    let sf;
-
-    try {
-      // Initialize Stockfish worker from local file
-      sf = new Worker('/stockfish.js');
-
-      sf.onerror = (err) => {
-        console.error('Stockfish Worker error:', err);
-        setError('Failed to load chess engine');
-        setIsReady(false);
-      };
-
-      sf.onmessage = (event) => {
-        const message = event.data;
-
-        if (message === 'readyok') {
-          setIsReady(true);
-          setError(null);
-        }
-
-        // Handle evaluation responses
-        if (message.includes('score')) {
-          const handler = responseHandlers.current.evaluation;
-          if (handler) handler(message);
-        }
-
-        // Handle best move responses
-        if (message.startsWith('bestmove')) {
-          const handler = responseHandlers.current.bestmove;
-          if (handler) handler(message);
-        }
-      };
-
-      // Initialize UCI protocol
-      sf.postMessage('uci');
-      sf.postMessage('setoption name Skill Level value 10');
-      sf.postMessage('isready');
-
-      setStockfish(sf);
-    } catch (err) {
-      console.error('Failed to initialize Stockfish:', err);
-      setError('Failed to initialize chess engine');
-      setIsReady(false);
-    }
-
-    return () => {
-      if (sf) {
-        sf.terminate();
+    // Initialize Stockfish worker
+    const sf = new Worker('https://cdn.jsdelivr.net/npm/stockfish.js@10.0.2/stockfish.js');
+    
+    sf.onmessage = (event) => {
+      const message = event.data;
+      
+      if (message === 'readyok') {
+        setIsReady(true);
+      }
+      
+      // Handle evaluation responses
+      if (message.includes('score')) {
+        const handler = responseHandlers.current.evaluation;
+        if (handler) handler(message);
+      }
+      
+      // Handle best move responses
+      if (message.startsWith('bestmove')) {
+        const handler = responseHandlers.current.bestmove;
+        if (handler) handler(message);
       }
     };
+
+    // Initialize UCI protocol
+    sf.postMessage('uci');
+    sf.postMessage('setoption name Skill Level value 10');
+    sf.postMessage('isready');
+    
+    setStockfish(sf);
+
+    return () => sf.terminate();
   }, []);
 
   /**
@@ -114,5 +94,5 @@ export const useStockfish = () => {
     }, 'evaluation');
   }, [sendCommand]);
 
-  return { isReady, error, getBestMove, evaluatePosition };
+  return { isReady, getBestMove, evaluatePosition };
 };
