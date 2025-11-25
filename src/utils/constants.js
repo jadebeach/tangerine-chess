@@ -1,9 +1,28 @@
 /**
- * Unicode symbols for chess pieces
+ * Unicode symbols for chess pieces (fallback)
  */
 export const PIECE_SYMBOLS = {
   'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚',
   'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔'
+};
+
+/**
+ * Get piece image path
+ * @param {string} type - Piece type (p, n, b, r, q, k)
+ * @param {string} color - Piece color (w or b)
+ * @returns {string} Path to piece image
+ */
+export const getPieceImage = (type, color) => {
+  const colorPrefix = color === 'w' ? 'white' : 'black';
+  const pieceNames = {
+    'p': 'pawn',
+    'n': 'knight',
+    'b': 'bishop',
+    'r': 'rook',
+    'q': 'queen',
+    'k': 'king'
+  };
+  return `/pieces/${colorPrefix}-${pieceNames[type]}.svg`;
 };
 
 /**
