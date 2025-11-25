@@ -19,35 +19,46 @@ export const useStockfish = () => {
 
       sf.onerror = (err) => {
         console.error('Stockfish Worker error:', err);
-        setError('Failed to load chess engine');
+        console.error('Error message:', err.message);
+        console.error('Error filename:', err.filename);
+        console.error('Error line:', err.lineno);
+        setError(`Failed to load chess engine: ${err.message || 'Unknown error'}`);
         setIsReady(false);
       };
 
       sf.onmessage = (event) => {
         const message = event.data;
+        console.log('Stockfish:', message); // Debug: log all messages
 
         if (message === 'readyok') {
+          console.log('✓ Stockfish is ready!');
           setIsReady(true);
           setError(null);
         }
 
         // Handle evaluation responses
-        if (message.includes('score')) {
+        if (typeof message === 'string' && message.includes('score')) {
           const handler = responseHandlers.current.evaluation;
           if (handler) handler(message);
         }
 
         // Handle best move responses
-        if (message.startsWith('bestmove')) {
+        if (typeof message === 'string' && message.startsWith('bestmove')) {
           const handler = responseHandlers.current.bestmove;
           if (handler) handler(message);
         }
       };
 
-      // Initialize UCI protocol
-      sf.postMessage('uci');
-      sf.postMessage('setoption name Skill Level value 10');
-      sf.postMessage('isready');
+      // Initialize UCI protocol with a slight delay
+      console.log('Initializing Stockfish...');
+      setTimeout(() => {
+        if (sf) {
+          console.log('Sending UCI commands...');
+          sf.postMessage('uci');
+          sf.postMessage('setoption name Skill Level value 10');
+          sf.postMessage('isready');
+        }
+      }, 100);
 
       setStockfish(sf);
     } catch (err) {
