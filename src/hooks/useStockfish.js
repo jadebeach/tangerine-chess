@@ -15,7 +15,8 @@ export const useStockfish = () => {
 
     try {
       // Initialize Stockfish worker from local file
-      sf = new Worker('/stockfish.js');
+      // Use stockfish.worker.js which is designed to be loaded as a Worker
+      sf = new Worker('/stockfish.worker.js');
 
       sf.onerror = (err) => {
         console.error('Stockfish Worker error:', err);
