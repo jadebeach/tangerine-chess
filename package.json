@@ -1,7 +1,7 @@
 {
-  "name": "chess-app",
+  "name": "tangerine-chess",
   "version": "1.0.0",
-  "description": "Chess game with Stockfish integration",
+  "description": "Tangerine Chess embodies the spirit of 橘中樂 (jú zhōng lè) - finding pleasure in the art of chess",
   "private": true,
   "dependencies": {
     "react": "^18.2.0",
