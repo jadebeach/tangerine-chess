@@ -39,7 +39,7 @@ const App = () => {
   const [isThinking, setIsThinking] = useState(false);
   const [gameStatus, setGameStatus] = useState('');
 
-  const { isReady, getBestMove, evaluatePosition } = useStockfish();
+  const { isReady, error, getBestMove, evaluatePosition } = useStockfish();
 
   // Update position from game state
   const updatePosition = useCallback(() => {
@@ -272,6 +272,12 @@ const App = () => {
           />
 
           <StatusDisplay gameStatus={gameStatus} isThinking={isThinking} />
+
+          {error && (
+            <div className="panel bg-red-50 border-red-200">
+              <p className="text-red-700 m-0">⚠️ {error}</p>
+            </div>
+          )}
         </div>
 
         {/* Center - Chess Board */}
