@@ -5,13 +5,13 @@ import { PIECE_SYMBOLS, getFiles, getRanks, isLightSquare } from '../utils/const
  * ChessBoard Component
  * Renders the chess board with pieces and highlights
  */
-const ChessBoard = ({ 
-  position, 
-  onSquareClick, 
-  selectedSquare, 
-  legalMoves, 
-  lastMove, 
-  orientation = 'white' 
+const ChessBoard = ({
+  position,
+  onSquareClick,
+  selectedSquare,
+  legalMoves,
+  lastMove,
+  orientation = 'white'
 }) => {
   const files = getFiles(orientation);
   const ranks = getRanks(orientation);
@@ -20,12 +20,19 @@ const ChessBoard = ({
     return lastMove && (lastMove.from === square || lastMove.to === square);
   };
 
+  // Helper to convert square notation to array indices
+  const getPieceAtSquare = (square) => {
+    const fileIndex = 'abcdefgh'.indexOf(square[0]);
+    const rankIndex = 8 - parseInt(square[1]); // chess.js board() returns rank 8 at index 0
+    return position[rankIndex]?.[fileIndex] || null;
+  };
+
   return (
     <div className="grid grid-cols-8 gap-0 w-full max-w-[560px] aspect-square border-2 border-gray-800 shadow-2xl rounded-sm relative">
-      {ranks.map(rank => 
+      {ranks.map(rank =>
         files.map(file => {
           const square = `${file}${rank}`;
-          const piece = position[square];
+          const piece = getPieceAtSquare(square);
           const isLight = isLightSquare(file, rank, orientation);
           const isSelected = selectedSquare === square;
           const isLegalMove = legalMoves.includes(square);
