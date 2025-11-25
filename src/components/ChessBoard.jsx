@@ -44,6 +44,7 @@ const ChessBoard = ({
               onClick={() => onSquareClick(square)}
               className={`
                 chess-square
+                aspect-square
                 ${isLight ? 'bg-board-light' : 'bg-board-dark'}
                 ${isSelected ? 'border-4 border-primary' : ''}
                 ${isLastMove ? 'shadow-[inset_0_0_0_2px_rgba(74,144,226,0.5)]' : ''}
