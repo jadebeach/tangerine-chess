@@ -14,9 +14,9 @@ export const useStockfish = () => {
     let sf;
 
     try {
-      // Initialize Stockfish worker from local file
-      // Use stockfish-wrapper.js which properly configures the WASM path
-      sf = new Worker('/stockfish-wrapper.js');
+      // Initialize Stockfish worker using the single-threaded WASM version
+      // This version doesn't require SharedArrayBuffer or CORS headers
+      sf = new Worker('/stockfish.js');
 
       sf.onerror = (err) => {
         console.error('Stockfish Worker error:', err);
