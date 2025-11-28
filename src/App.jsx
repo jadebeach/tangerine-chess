@@ -13,6 +13,7 @@ import StatusDisplay from './components/StatusDisplay';
 import { useStockfish } from './hooks/useStockfish';
 import { GAME_MODES, COLORS } from './utils/constants';
 import { getGameStatus } from './utils/helpers';
+import { getBookMoves, isInOpening, getOpeningName, isBookMove } from './services/openingBook';
 
 /**
  * Main Chess Application Component
@@ -59,16 +60,55 @@ const App = () => {
 
   // Generate tutor advice
   const generateTutorAdvice = useCallback(() => {
-    if (gameMode !== GAME_MODES.TUTOR || !isReady || !evaluation) return;
+    if (gameMode !== GAME_MODES.TUTOR || !isReady) return;
 
     const fen = game.fen();
+
+    // Check if we're in the opening phase
+    if (isInOpening(game)) {
+      const bookData = getBookMoves(fen);
+
+      if (bookData) {
+        // We're in book - teach opening theory
+        const openingName = getOpeningName(fen);
+        const lastMove = moveHistory.length > 0 ? moveHistory[moveHistory.length - 1].san : null;
+
+        let advice = `📚 Opening: ${openingName}\n\n`;
+
+        // Check if last move was a book move
+        if (lastMove && bookData.moves.includes(lastMove)) {
+          advice += `✓ Good! ${lastMove} is a book move.\n\n`;
+        }
+
+        advice += `Book moves: ${bookData.moves.join(', ')}\n\n`;
+
+        // Add opening tips
+        if (bookData.tips && bookData.tips.length > 0) {
+          advice += `💡 Tips:\n`;
+          bookData.tips.slice(0, 2).forEach(tip => {
+            advice += `• ${tip}\n`;
+          });
+        }
+
+        setTutorAdvice(advice);
+        return;
+      } else {
+        // Out of book but still in opening
+        setTutorAdvice('📚 You\'ve left opening theory. Focus on:\n• Develop all pieces\n• Control the center\n• Castle for king safety\n• Don\'t move the same piece twice');
+        return;
+      }
+    }
+
+    // After opening - use engine analysis
+    if (!evaluation) return;
+
     getBestMove(fen, 20, (bestMove) => {
       const moves = game.moves({ verbose: true });
-      const bestMoveObj = moves.find(m => `${m.from}${m.to}` === bestMove.slice(0, 4));
-      
+      const bestMoveObj = moves.find(m => m.san === bestMove || `${m.from}${m.to}` === bestMove.slice(0, 4));
+
       if (bestMoveObj) {
-        let advice = `Consider ${bestMoveObj.san}. `;
-        
+        let advice = `🤔 Consider ${bestMoveObj.san}. `;
+
         if (evaluation.mate !== null) {
           advice += `This leads to mate in ${Math.abs(evaluation.mate)} moves.`;
         } else if (evaluation.centipawns !== null) {
@@ -90,7 +130,7 @@ const App = () => {
         setTutorAdvice(advice);
       }
     });
-  }, [game, gameMode, isReady, evaluation, getBestMove]);
+  }, [game, gameMode, isReady, evaluation, getBestMove, moveHistory]);
 
   // CPU move logic
   const makeCpuMove = useCallback(() => {
