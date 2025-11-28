@@ -116,13 +116,13 @@ const App = () => {
     });
   }, [game, isReady, isThinking, cpuDifficulty, getBestMove, updatePosition]);
 
-  // Trigger CPU move
+  // Trigger CPU move when it's CPU's turn
   useEffect(() => {
-    if (gameMode === GAME_MODES.CPU && game.turn() === cpuColor[0] && !game.isGameOver() && !reviewMode) {
+    if (gameMode === GAME_MODES.CPU && game.turn() === cpuColor[0] && !game.isGameOver() && !reviewMode && !isThinking) {
       const timer = setTimeout(() => makeCpuMove(), 500);
       return () => clearTimeout(timer);
     }
-  }, [game, gameMode, cpuColor, makeCpuMove, reviewMode]);
+  }, [moveHistory.length, gameMode, cpuColor, game.turn(), reviewMode, isThinking, makeCpuMove]);
 
   // Square click handler
   const handleSquareClick = useCallback((square) => {
